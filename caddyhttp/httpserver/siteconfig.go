@@ -17,7 +17,7 @@ package httpserver
 import (
 	"time"
 
-	"github.com/mholt/caddy/caddytls"
+	"github.com/skudriavtsev/caddy/caddytls"
 )
 
 // SiteConfig contains information about a site

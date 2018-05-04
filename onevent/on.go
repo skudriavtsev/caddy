@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/mholt/caddy"
-	"github.com/mholt/caddy/onevent/hook"
+	"github.com/skudriavtsev/caddy"
+	"github.com/skudriavtsev/caddy/onevent/hook"
 )
 
 func init() {

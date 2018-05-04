@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mholt/caddy/caddyhttp/httpserver"
+	"github.com/skudriavtsev/caddy/caddyhttp/httpserver"
 )
 
 func TestBodySizeLimit(t *testing.T) {

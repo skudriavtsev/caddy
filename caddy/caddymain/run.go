@@ -29,11 +29,11 @@ import (
 
 	"github.com/xenolf/lego/acmev2"
 
-	"github.com/mholt/caddy"
+	"github.com/skudriavtsev/caddy"
 	// plug in the HTTP server type
-	_ "github.com/mholt/caddy/caddyhttp"
+	_ "github.com/skudriavtsev/caddy/caddyhttp"
 
-	"github.com/mholt/caddy/caddytls"
+	"github.com/skudriavtsev/caddy/caddytls"
 	// This is where other plugins get plugged in (imported)
 )
 

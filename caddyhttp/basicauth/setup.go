@@ -17,8 +17,8 @@ package basicauth
 import (
 	"strings"
 
-	"github.com/mholt/caddy"
-	"github.com/mholt/caddy/caddyhttp/httpserver"
+	"github.com/skudriavtsev/caddy"
+	"github.com/skudriavtsev/caddy/caddyhttp/httpserver"
 )
 
 func init() {
