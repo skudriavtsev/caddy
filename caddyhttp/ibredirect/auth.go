@@ -21,7 +21,7 @@ type authReqData struct {
 
 type authItem struct {
 	Domains []string
-	Expire time.Time
+	Expires time.Time
 }
 
 var (
@@ -141,6 +141,7 @@ func (rd Redirect) authPage(w http.ResponseWriter, r *http.Request) (int, error)
 		Domain: rd.Suffix,
 		Name: authTokenCookieName,
 		Value: token,
+		Expires: aItem.Expires,
 	}
 	http.SetCookie(w, &aCookie)
 
