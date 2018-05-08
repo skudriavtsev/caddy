@@ -6,6 +6,7 @@ import (
 	"net/http"
 	urllib "net/url"
 	"strings"
+	"html/template"
 
 	// log "github.com/sirupsen/logrus"
 )
@@ -24,15 +25,6 @@ func splitHostPort(hostport string) (string, string, error) {
 	return net.SplitHostPort(hostport)
 }
 
-func getDefaultPort(r *http.Request) string {
-	if r.TLS == nil {
-		return "80"
-	}
-
-	return "443"
-}
-
-
 const unsuffixDomainError = "Wrong domain name to remove the suffix from."
 func (rd Redirect) getUnSuffixedDomain(domain string) (string, error) {
 	res, err := rd.hasSuffix(domain)
@@ -48,7 +40,7 @@ func (rd Redirect) getUnSuffixedDomain(domain string) (string, error) {
 		return "", fmt.Errorf(unsuffixDomainError)
 	}
 
-	return domain[:i], nil
+	return domain[:(i-1)], nil
 }
 
 const unsuffixURLerror = "Wrong domain name to remove the suffix from."
@@ -91,33 +83,42 @@ func (rd Redirect) hasSuffix(h string) (bool, error) {
 	return false, nil
 }
 
-func (rd Redirect) redirectToSuffixedURL(w http.ResponseWriter, r *http.Request) (int, error) {
-	var secure string
+// Takes original URL and redirects to a prefixed domain.
+func (rd Redirect) redirectToSuffixedURL(w http.ResponseWriter, ard *authReqData) (int, error) {
+	url, err := urllib.Parse(ard.OriginURL)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
 
-	host, port, err := splitHostPort(r.Host)
+	host, port, err := splitHostPort(url.Host)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
 	if port == "" {
-		port = getDefaultPort(r)
+		if url.Scheme == "http" {
+			port = "80"
+		} else {
+			port = "443"
+		}
 	}
-	if r.TLS != nil {
-		secure = "s"
-	}
-	target := fmt.Sprintf("http%s://%s.%s:%s/%s", secure, host, rd.Suffix, port, r.RequestURI)
+	url.Host = fmt.Sprintf("%s.%s:%s", host, rd.Suffix, port)
 
-	return rd.redirectWithReferer(w, r, target)
+	return rd.redirectWithReferer(w, url.String())
 }
 
-const redirectPage = `
-<html xmlns="http://www.w3.org/1999/xhtml">    
-  <head>      
-    <meta http-equiv="refresh" content="0;URL='%s'" />    
-  </head>    
-  <body>Redirecting, please wait...</body>  
-</html>     
-`
-func (rd Redirect) redirectWithReferer(w http.ResponseWriter, r *http.Request, newURL string) (int, error) {
+func (rd Redirect) redirectWithReferer(w http.ResponseWriter, newURL string) (int, error) {
 	fmt.Fprintf(w, redirectPage, newURL)
 	return 0, nil
+}
+
+func showAuthPage(w http.ResponseWriter, data *authPageData) error {
+	tpl, err := template.New("authPage").Parse(authPageTemplate)
+	if err != nil {
+		return err
+	}
+	err = tpl.Execute(w, data)
+	if err != nil {
+		return err
+	}
+	return nil
 }

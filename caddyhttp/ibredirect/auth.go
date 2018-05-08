@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	// "html/template"
 
 	// log "github.com/sirupsen/logrus"
 )
 
 type authPageData struct {
+	ActionURL string
 	OriginURL string
 	Message string
 }
@@ -41,18 +41,16 @@ func getAuthReqData(r *http.Request) (*authReqData, error)  {
 		aReqData.OriginURL = origin[0]
 	}
 
-	return aReqData, nil
-}
+	if aReqData.OriginURL == "" {
+		referer, found := r.Header["Referer"]
+		if found {
+			aReqData.OriginURL = referer[0]
+		} else {
+			aReqData.OriginURL = noRefererFound
+		}
+	}
 
-func getReferer(r *http.Request, ard *authReqData) string {
-	if ard.OriginURL != "" {
-		return ard.OriginURL
-	}
-	referer, found := r.Header["Referer"]
-	if found {
-		return referer[0]
-	}
-	return noRefererFound
+	return aReqData, nil
 }
 
 // for now it is a fake auth
@@ -86,6 +84,10 @@ func (rd Redirect) hasAuth(r *http.Request) bool {
 	}
 
 	uDomain, err := rd.getUnSuffixedDomain(domain)
+	if err != nil {
+		return false
+	}
+
 	for _, d := range aItem.Domains {
 		if uDomain == d {
 			return true
@@ -101,37 +103,46 @@ func (rd Redirect) authPage(w http.ResponseWriter, r *http.Request) (int, error)
 		return http.StatusInternalServerError, err
 	}
 
-	aPageData := &authPageData{}
-	aPageData.OriginURL = getReferer(r, aReqData)
+	aPageData := &authPageData{
+		ActionURL: r.URL.String(),
+		OriginURL: aReqData.OriginURL,
+	}
 	token := aReqData.Token
 	if token == "" {
-		// apply template
-		// show page and stop processing
+		err = showAuthPage(w, aPageData)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
 		return 0, nil
 	}
 
 	aItem, err := authenticate(token)
 	if err != nil {
 		aPageData.Message = err.Error()
-		// apply template
-		// show page and stop processing
+		err = showAuthPage(w, aPageData)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
 		return 0, nil
 	}
 
 	if aItem == nil {
 		aPageData.Message = "An invalid token has been entered"
-		// apply template
-		// show page and stop processing
+		err = showAuthPage(w, aPageData)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
 		return 0, nil
 	}
 
 	aStorage[token] = aItem
 
 	aCookie := http.Cookie{
+		Domain: rd.Suffix,
 		Name: authTokenCookieName,
 		Value: token,
 	}
 	http.SetCookie(w, &aCookie)
 
-	return rd.redirectToSuffixedURL(w, r)
+	return rd.redirectToSuffixedURL(w, aReqData)
 }

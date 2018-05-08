@@ -23,17 +23,9 @@ func (rd Redirect) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error
 
 	target := fmt.Sprintf("http://%s/", rd.Suffix)
 
-	return rd.redirectWithReferer(w, r, target)
+	return rd.redirectWithReferer(w, target)
 }
 
-const stubPage = `
-<html xmlns="http://www.w3.org/1999/xhtml">    
-  <head>      
-    <title>Test</title>    
-  </head>    
-  <body>Debug</body>  
-</html>     
-`
 func (rd Redirect) serve(w http.ResponseWriter, r *http.Request) (int, error) {
 	if !rd.hasAuth(r) {
 		return rd.authPage(w, r)
