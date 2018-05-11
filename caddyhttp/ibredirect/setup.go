@@ -36,13 +36,16 @@ func init() {
 		Action:     setup,
 	})
 
-	fakeAuthTokens["7b89ab36-524b-11e8-bc8b-3b395b206d1f"] = &authItem{
-		Domains: []string{"domain.a", "domain.b", "test.pvt"},
-		Expires: time.Now().Add(120 * time.Second),
+	// fakeAuthTokens["7b89ab36-524b-11e8-bc8b-3b395b206d1f"] = &authItem{
+	fakeAuthTokens["token1"] = &authItem{
+		Domains: []string{"domain.a", "domain.b", "opennet.ru", "www.opennet.ru", "test.pvt"},
+		// Domains: []string{"domain.a", "domain.b", "opennet.ru", "test.pvt"},
+		Expires: time.Now().Add(1200 * time.Second),
 	}
-	fakeAuthTokens["7c20cd0e-524b-11e8-bcf5-2fb7fb8b1b6a"] = &authItem{
+	// fakeAuthTokens["7c20cd0e-524b-11e8-bcf5-2fb7fb8b1b6a"] = &authItem{
+	fakeAuthTokens["token2"] = &authItem{
 		Domains: []string{"domain.c", "domain.d", "test2.pvt"},
-		Expires: time.Now().Add(120 * time.Second),
+		Expires: time.Now().Add(1200 * time.Second),
 	}
 }
 

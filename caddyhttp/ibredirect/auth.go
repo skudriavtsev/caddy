@@ -10,12 +10,10 @@ import (
 
 type authPageData struct {
 	ActionURL string
-	OriginURL string
 	Message string
 }
 
 type authReqData struct {
-	OriginURL string
 	Token string
 }
 
@@ -34,20 +32,6 @@ func getAuthReqData(r *http.Request) (*authReqData, error)  {
 	token, found := r.Form[tokenParamName]
 	if found {
 		aReqData.Token = token[0]
-	}
-
-	origin, found := r.Form[originUrlParamName]
-	if found {
-		aReqData.OriginURL = origin[0]
-	}
-
-	if aReqData.OriginURL == "" {
-		referer, found := r.Header["Referer"]
-		if found {
-			aReqData.OriginURL = referer[0]
-		} else {
-			aReqData.OriginURL = noRefererFound
-		}
 	}
 
 	return aReqData, nil
@@ -105,7 +89,6 @@ func (rd Redirect) authPage(w http.ResponseWriter, r *http.Request) (int, error)
 
 	aPageData := &authPageData{
 		ActionURL: r.URL.String(),
-		OriginURL: aReqData.OriginURL,
 	}
 	token := aReqData.Token
 	if token == "" {
@@ -138,12 +121,14 @@ func (rd Redirect) authPage(w http.ResponseWriter, r *http.Request) (int, error)
 	aStorage[token] = aItem
 
 	aCookie := http.Cookie{
-		Domain: rd.Suffix,
+		Path: "/",
+		Domain: "." + rd.Suffix,
 		Name: authTokenCookieName,
 		Value: token,
-		Expires: aItem.Expires,
+		// Expires: aItem.Expires,
 	}
 	http.SetCookie(w, &aCookie)
 
-	return rd.redirectToSuffixedURL(w, aReqData)
+	target := fmt.Sprintf("http://%s%s", r.Host, r.RequestURI)
+	return rd.redirect(w, r, target)
 }

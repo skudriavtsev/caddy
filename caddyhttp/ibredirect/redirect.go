@@ -18,21 +18,12 @@ func (rd Redirect) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error
 		return http.StatusInternalServerError, err
 	}
 	if found {
-		return rd.serve(w, r)
+		if !rd.hasAuth(r) {
+			return rd.authPage(w, r)
+		}
+		return rd.Next.ServeHTTP(w, r)
 	}
 
-	target := fmt.Sprintf("http://%s/", rd.Suffix)
-
-	return rd.redirectWithReferer(w, target)
-}
-
-func (rd Redirect) serve(w http.ResponseWriter, r *http.Request) (int, error) {
-	if !rd.hasAuth(r) {
-		return rd.authPage(w, r)
-	}
-
-	// the main processing
-	fmt.Fprintf(w, stubPage)
-
-	return 0, nil
+	target := fmt.Sprintf("http://%s%s", r.Host, r.RequestURI)
+	return rd.redirectToSuffixedURL(w, r, target)
 }

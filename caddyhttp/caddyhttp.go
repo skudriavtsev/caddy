@@ -39,6 +39,7 @@ import (
 	_ "github.com/skudriavtsev/caddy/caddyhttp/push"
 	_ "github.com/skudriavtsev/caddy/caddyhttp/redirect"
 	_ "github.com/skudriavtsev/caddy/caddyhttp/ibredirect"
+	_ "github.com/skudriavtsev/caddy/caddyhttp/ibproxy"
 	_ "github.com/skudriavtsev/caddy/caddyhttp/requestid"
 	_ "github.com/skudriavtsev/caddy/caddyhttp/rewrite"
 	_ "github.com/skudriavtsev/caddy/caddyhttp/root"

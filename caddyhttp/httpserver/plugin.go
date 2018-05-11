@@ -579,6 +579,7 @@ var directives = []string{
 	"basicauth",
 	"redir",
 	"ibredir",
+	"ibproxy",
 	"status",
 	"cors",   // github.com/captncraig/cors/caddy
 	"nobots", // github.com/Xumeiquer/nobots
