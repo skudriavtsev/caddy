@@ -62,6 +62,10 @@ func (rd Redirect) hasAuth(r *http.Request) bool {
 		return false
 	}
 
+	if time.Now().After(aItem.Expires) {
+		return false
+	}
+
 	domain, _, err := splitHostPort(r.Host)
 	if err != nil {
 		return false
@@ -125,7 +129,7 @@ func (rd Redirect) authPage(w http.ResponseWriter, r *http.Request) (int, error)
 		Domain: "." + rd.Suffix,
 		Name: authTokenCookieName,
 		Value: token,
-		// Expires: aItem.Expires,
+		Expires: aItem.Expires,
 	}
 	http.SetCookie(w, &aCookie)
 
